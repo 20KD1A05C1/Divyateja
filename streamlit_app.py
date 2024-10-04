@@ -18,7 +18,7 @@ class Neo4jDatabase:
         query = """
         UNWIND $symptomList AS symptom
         MATCH (s:Symptom)
-        WHERE toLower(s.name) = toLower(symptom)
+        WHERE s.name= symptom
         -[:INDICATES]->(d:Disease)
         OPTIONAL MATCH (d)-[:TREATED_BY]->(m:Medicine)
         RETURN d.name AS disease, COLLECT(m.name) AS medicines
