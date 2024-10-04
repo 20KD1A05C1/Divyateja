@@ -18,9 +18,9 @@ class Neo4jDatabase:
         -[:INDICATES]->(d:Disease)
         OPTIONAL MATCH (d)-[:TREATED_BY]->(m:Medicine)
         RETURN d.name AS disease, COLLECT(m.name) AS medicines"""
-    with self.driver.session() as session:
-        result = session.run(query, symptom=symptom)
-        return [{"disease": record["disease"], "medicines": record["medicines"]} for record in result]
+        with self.driver.session() as session:
+            result = session.run(query, symptom=symptom)
+            return [{"disease": record["disease"], "medicines": record["medicines"]} for record in result]
 
 # Streamlit app layout
 st.title("Disease Ontology: Symptom to Disease Finder")
