@@ -12,7 +12,7 @@ class Neo4jDatabase:
 
     def get_disease_info(self, symptom):
         query = """
-        MATCH (s:Symptom {name: $symptom})-[:INDICATES]->(d:Disease)
+        MATCH (s:Symptom {name: $Symptom})-[:INDICATES]->(d:Disease)
         OPTIONAL MATCH (d)-[:TREATED_BY]->(m:Medicine)
         RETURN d.name AS disease, COLLECT(m.name) AS medicines
         """
