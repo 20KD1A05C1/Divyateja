@@ -12,7 +12,7 @@ class Neo4jDatabase:
 
     # Updated get_disease_info method for exact symptom match (all symptoms required)
     def get_disease_info(self, symptom):
-    query = """
+        query = """
     MATCH (s:Symptom)
     WHERE toLower(s.name) = toLower($symptom)
     -[:INDICATES]->(d:Disease)
