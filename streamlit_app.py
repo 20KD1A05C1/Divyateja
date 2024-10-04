@@ -16,11 +16,11 @@ class Neo4jDatabase:
         
         # Create the query to handle multiple symptoms (case-sensitive)
         query = """
-        UNWIND $symptomList AS symptom
-        MATCH (s:Symptom {name: symptom})-[:INDICATES]->(d:Disease)
-        OPTIONAL MATCH (d)-[:TREATED_BY]->(m:Medicine)
-        RETURN d.name AS disease, COLLECT(m.name) AS medicines
-        """
+    MATCH (s:Symptom)-[:INDICATES]->(d:Disease)
+    WHERE s.name IN $symptomList
+    OPTIONAL MATCH (d)-[:TREATED_BY]->(m:Medicine)
+    RETURN d.name AS disease, COLLECT(DISTINCT m.name) AS medicines
+    """
 
         with self.driver.session() as session:
             result = session.run(query, symptomList=symptom_list)
