@@ -11,23 +11,17 @@ class Neo4jDatabase:
             self.driver.close()
 
     # Updated get_disease_info method for exact symptom match (all symptoms required)
-    def get_disease_info(self, symptoms):
-        # Split the input symptoms by commas and trim any whitespace
-        symptom_list = [s.strip() for s in symptoms.split(',') if s.strip()]
-
-        # Query to match diseases indicated by all input symptoms
-        query = """
-        MATCH (d:Disease)<-[:INDICATES]-(s:Symptom)
-        WHERE s.name IN $symptomList
-        WITH d, COLLECT(s.name) AS matchedSymptoms
-        WHERE apoc.coll.sort(matchedSymptoms) = apoc.coll.sort($symptomList)
-        OPTIONAL MATCH (d)-[:TREATED_BY]->(m:Medicine)
-        RETURN d.name AS disease, COLLECT(DISTINCT m.name) AS medicines
-        """
-
-        with self.driver.session() as session:
-            result = session.run(query, symptomList=symptom_list)
-            return [{"disease": record["disease"], "medicines": record["medicines"]} for record in result]
+    def get_disease_info(self, symptom):
+    query = """
+    MATCH (s:Symptom)
+    WHERE toLower(s.name) = toLower($symptom)
+    -[:INDICATES]->(d:Disease)
+    OPTIONAL MATCH (d)-[:TREATED_BY]->(m:Medicine)
+    RETURN d.name AS disease, COLLECT(m.name) AS medicines
+    """
+    with self.driver.session() as session:
+        result = session.run(query, symptom=symptom)
+        return [{"disease": record["disease"], "medicines": record["medicines"]} for record in result]
 
 # Streamlit app layout
 st.title("Disease Ontology: Symptom to Disease Finder")
