@@ -10,17 +10,16 @@ class Neo4jDatabase:
         if self.driver:
             self.driver.close()
 
-    # Updated get_disease_info method for partial symptom match
     def get_disease_info(self, symptoms):
         # Split the input symptoms by commas and trim any whitespace
         symptom_list = [s.strip() for s in symptoms.split(',') if s.strip()]
-
-        # Create the query to handle multiple symptoms (case-sensitive, any match)
+        
+        # Create the query to handle multiple symptoms (case-sensitive)
         query = """
-        MATCH (s:Symptom)-[:INDICATES]->(d:Disease)
-        WHERE s.name IN $symptomList
+        UNWIND $symptomList AS symptom
+        MATCH (s:Symptom {name: symptom})-[:INDICATES]->(d:Disease)
         OPTIONAL MATCH (d)-[:TREATED_BY]->(m:Medicine)
-        RETURN d.name AS disease, COLLECT(DISTINCT m.name) AS medicines
+        RETURN d.name AS disease, COLLECT(m.name) AS medicines
         """
 
         with self.driver.session() as session:
@@ -38,23 +37,23 @@ password = st.secrets["neo4j"]["password"]
 # Initialize Neo4j connection
 db = Neo4jDatabase(uri, username, password)
 
-# User input for symptoms (comma-separated)
-symptom_input = st.text_input("Enter symptoms (comma-separated):")
+# User input for symptoms
+symptom_input = st.text_input("Enter one or more symptoms (separated by commas):")
 
 if st.button("Search"):
     if symptom_input:
-        # Query the Neo4j database
+        # Query the Neo4j database for multiple symptoms
         results = db.get_disease_info(symptom_input)
 
         if results:
-            st.write(f"Diseases related to the symptoms '{symptom_input}':")
+            st.write(f"Diseases related to the given symptom(s):")
             for item in results:
                 st.write(f"Disease: {item['disease']}")
                 st.write(f"Medicines: {', '.join(item['medicines']) if item['medicines'] else 'No medicines available'}")
         else:
-            st.write("No disease found for the given symptoms.")
+            st.write("No diseases found for the given symptom(s).")
     else:
-        st.write("Please enter symptoms.")
+        st.write("Please enter at least one symptom.")
 
 # Close the Neo4j connection
 db.close()
