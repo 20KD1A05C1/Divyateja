@@ -17,9 +17,7 @@ class Neo4jDatabase:
         # Create the query with UNWIND to handle multiple symptoms
         query = """
         UNWIND $symptomList AS symptom
-        MATCH (s:Symptom)
-        WHERE s.name= symptom
-        -[:INDICATES]->(d:Disease)
+        MATCH (s:Symptom {name: symptom})-[:INDICATES]->(d:Disease)
         OPTIONAL MATCH (d)-[:TREATED_BY]->(m:Medicine)
         RETURN d.name AS disease, COLLECT(m.name) AS medicines
         """
