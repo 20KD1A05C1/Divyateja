@@ -12,7 +12,7 @@ class Neo4jDatabase:
 
     def get_disease_info(self, symptom):
         query = """
-        MATCH (s:Symptom {name: $Symptom})-[:INDICATES]->(d:Disease)
+        MATCH (s:Symptom {name: $symptom})-[:INDICATES]->(d:Disease)
         OPTIONAL MATCH (d)-[:TREATED_BY]->(m:Medicine)
         RETURN d.name AS disease, COLLECT(m.name) AS medicines
         """
@@ -37,7 +37,7 @@ symptom_input = st.text_input("Enter a symptom:")
 if st.button("Search"):
     if symptom_input:
         # Query the Neo4j database
-        symptom_input =symptom_input.lower()
+  
         results = db.get_disease_info(symptom_input)
         
         if results:
