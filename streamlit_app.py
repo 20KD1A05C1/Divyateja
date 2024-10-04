@@ -10,11 +10,12 @@ class Neo4jDatabase:
         if self.driver:
             self.driver.close()
 
+    # Updated get_disease_info method based on the structure of the Neo4j database
     def get_disease_info(self, symptom):
         query = """
         MATCH (s:Symptom {name: $symptom})-[:INDICATES]->(d:Disease)
         OPTIONAL MATCH (d)-[:TREATED_BY]->(m:Medicine)
-        RETURN d.name AS disease, COLLECT(m.name) AS medicines
+        RETURN d.name AS disease, COLLECT(DISTINCT m.name) AS medicines
         """
         with self.driver.session() as session:
             result = session.run(query, symptom=symptom)
@@ -36,8 +37,7 @@ symptom_input = st.text_input("Enter a symptom:")
 
 if st.button("Search"):
     if symptom_input:
-        # Query the Neo4j database
-        symptom_input =symptom_input.lower()
+        # Query the Neo4j database for the exact symptom case-sensitive match
         results = db.get_disease_info(symptom_input)
 
         if results:
